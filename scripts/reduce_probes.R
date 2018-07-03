@@ -15,6 +15,7 @@ colnames(din) <- c("chr", "start", "stop", "shift", "res.number", "dir", "pct_at
 max_probes <- 5000
 
 ## Clean up unpaired probes ###################################################################################
+
 ## Number of restriction sites do not match up with forward and reverse probe numbers
 identical(length(unique(din$res.number)), length(din$start[din$dir == "r"]), length(din$stop[din$dir == "f"]))
 
@@ -27,20 +28,18 @@ dout <- din[!(din$res.number %in% problems), ]
 ## They should all be the same length
 identical(length(unique(dout$res.number)), length(dout$start[dout$dir == "r"]), length(dout$stop[dout$dir == "f"]))
 
-## Compute intervals for overlapping probes ###################################################################
+## Find overlap between each pair of probes ###################################################################
 
-## Bind into a data frame
-intervals <- as.data.frame(cbind(res.number=unique(dout$res.number), rstart= dout$start[dout$dir == "r"], fend= dout$stop[dout$dir == "f"]))
-intervals$dis <- intervals$rstart - intervals$fend
-intervals$diff[which(intervals$dis < 0)] <- "overlap"
-intervals$diff[which(intervals$dis > 0)] <- "gap"
+## Find indicies of forward probes (should be all odd)
+fwd <- which(dout$dir == "f")
 
-## Maybe this is not the best way to find overlap....
-## Think of a better way than using starts and stops to compute overlap, maybe something that is coverage based.
-hist(intervals$dis[intervals$dis < 0])
-
-intervals$dis[intervals$dis < 0]
-
+## Apply function to compute overlaps and bind into data frame
+intervals <- as.data.frame(cbind(res.frag=unique(dout$res.number),
+                                 fstart= dout$start[dout$dir == "f"],
+                                 fend= dout$stop[dout$dir == "f"],
+                                 rstart= dout$start[dout$dir == "r"],
+                                 rend= dout$stop[dout$dir == "r"],
+                                 overlap=unlist(lapply(fwd, function(x) 
+                                   length(intersect(dout$start[x]:dout$stop[x], dout$start[x+1]:dout$stop[x+1]))))
+))
 ###############################################################################################################
-head(dout)
-
