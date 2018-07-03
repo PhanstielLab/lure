@@ -5,14 +5,12 @@
 ##    randomly chosen restriction sites
 
 
-## Read in data (din - data in) and max probes ################################################################
+## Read in data (din, data in) and max probes ################################################################
 
 library(readr)
 ## Read in final_probes.bed file from an output
 din <- as.data.frame(read_tsv("../output/final_probes.bed", col_names = F))
 colnames(din) <- c("chr", "start", "stop", "shift", "res.number", "dir", "pct_at", "pct_gc", "seq", "pass")
-
-max_probes <- 5000
 
 ## Clean up unpaired probes ###################################################################################
 
@@ -33,7 +31,7 @@ identical(length(unique(dout$res.number)), length(dout$start[dout$dir == "r"]), 
 ## Find indicies of forward probes (should be all odd)
 fwd <- which(dout$dir == "f")
 
-## Apply function to compute overlaps and bind into data frame
+## Apply function to compute overlapping coverage and bind into data frame
 intervals <- as.data.frame(cbind(res.frag=unique(dout$res.number),
                                  fstart= dout$start[dout$dir == "f"],
                                  fend= dout$stop[dout$dir == "f"],
@@ -42,4 +40,65 @@ intervals <- as.data.frame(cbind(res.frag=unique(dout$res.number),
                                  overlap=unlist(lapply(fwd, function(x) 
                                    length(intersect(dout$start[x]:dout$stop[x], dout$start[x+1]:dout$stop[x+1]))))
 ))
+
+## Add this to dout
+dout$overlap <- rep(intervals$overlap, each=2)
+
+##  This section removes probes until max_probes == n_probes ##################################################
+##
+##  Removal occurs in 2 major passes: the first pass is done systematically,
+##  removing the less ideal pair of overlapping probes (highest pass number) 
+##  from greatest to least overlap. The second pass is done semi-randomly, 
+##  randomly removing probes starting with the least ideal probes.
+
+## Subset overlapping probes and order them descending by overlap and pass
+dover <- dout[which(dout$overlap > 0),]
+dover <- dover[order(-dover$overlap, -dover$pass),]
+
+## Return indicies of unwanted overlapping probes
+prune1 <- unlist(lapply(unique(dover$res.number),
+function(x){ 
+  temp <- dover[dover$res.number == x,] 
+  return(as.numeric(row.names(temp[order(-temp$pass, -temp$shift), ][1,])))
+  }
+))
+
+## Subset remaining probes, order them by pass and shift, randomly break ties
+set.seed(123) # For reproducability
+remaining <- dout[!(row.names(dout) %in% prune1),]
+remaining <- remaining[sample(1:nrow(remaining)),]
+remaining <- remaining[order(-remaining$pass, -remaining$shift),]
+plot(remaining$res.number)
+
+# Join with prune1 to create an preferential removal list
+prune <- c(prune1, as.numeric(row.names(remaining)))
+
+## Check number of probes agains max_probes
+n_probes <- nrow(dout)
+
+max_probes = 10000
+
+if (max_probes > n_probes){
+  dout <- dout
+} else if (max_probes <= n_probes){
+  section <- n_probes - max_probes
+  unwanted_probes <- prune[1:section]
+  dout <- dout[!(row.names(dout) %in% unwanted_probes),]
+} else {
+  print("Something isn't right...")
+}
+
+pdf(file = sprintf("%d_probes.pdf", nrow(dout)))
+layout(matrix(c(1,1,2,3), 2, 2, byrow = TRUE))
+plot(dout$start,dout$start, xlim = c(133000000, 135000000),
+     main = sprintf("Probe Coverage (%d probes)", nrow(dout)),
+     xlab = "bp", ylab = "bp"
+     )
+plot(density(dout$pass), main = "Pass Distribution")
+hist(dout$pct_gc * 100, main = "GC Content", xlab = "% GC")
+par(mfrow=c(1,1))
+dev.off()
+
 ###############################################################################################################
+
+
