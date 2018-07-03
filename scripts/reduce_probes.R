@@ -9,7 +9,7 @@
 
 library(readr)
 ## Read in final_probes.bed file from an output
-din <- as.data.frame(read_tsv("output/final_probes.bed", col_names = F))
+din <- as.data.frame(read_tsv("../output/final_probes.bed", col_names = F))
 colnames(din) <- c("chr", "start", "stop", "shift", "res.number", "dir", "pct_at", "pct_gc", "seq", "pass")
 
 max_probes <- 5000
