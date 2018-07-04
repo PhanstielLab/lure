@@ -2,7 +2,7 @@
 
 usage () {
 	echo '
-	
+
      Description:
 
 	 Hi-Csq is a probe design tool for Hi-C squared experiments. Use the options detailed below
@@ -16,9 +16,11 @@ usage () {
 
 	-b (begin): Start position of your region of interest for probe design. -b must be less than -e.
 
-	-e (end): Stop position on the chromosome. -e must be greater than -b. 
+	-e (end): Stop position on the chromosome. -e must be greater than -b.
 
 	-r (restriction enzyme): Restriction enzyme to digest region of interest. (i.e. "^GATC,MobI")
+
+	-n (number of probes desired): Defaults to maximum possible probes if not supplied.
 
 
      Default:
@@ -31,12 +33,14 @@ usage () {
 
 	-r: "^GATC,MboI"
 
-'| less
+	-n: (max number of probes)
+
+' #| less
 
 }
 
 
-while getopts c:b:e:r:h ARGS;
+while getopts c:b:e:r:n:h ARGS;
 do
 	case "${ARGS}" in
 		c)
@@ -47,7 +51,9 @@ do
 		   stop=${OPTARG};;
 		r)
 		   resenz=${OPTARG};;
-		h|*) 
+		n)
+			 max_probes=${OPTARG};;
+		h|*)
 		   usage
 		   exit 1
 		;;
@@ -73,6 +79,7 @@ then
 	start="133000000"
 	stop="135000000"
 	resenz="^GATC,MobI"
+	max_probes=""
 fi
 
 
