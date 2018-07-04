@@ -89,4 +89,13 @@ cat output/final_forward.bed output/final_reverse.bed | awk -F "\t" '!seen[$5, $
 ## Add back in genomic coordinates
 awk -v OFS="\t" -v a="$chr" -v b="$start" -v c="$stop" '{print $1=a, $2=$2+b, $3=$3+b, $4, $5, $6, $7, $8, $9, $10}' output/final_probes.bed > output/temp.bed
 mv output/temp.bed output/final_probes.bed
-cat output/final_probes.bed
+
+## Clean-up unpaired probes and select desired number
+Rscript --vanilla scripts/reduce_probes.R $max_probes
+
+## Remove intermediate files, cat final output
+mv output/probes.bed probes.bed
+rm -r output/
+mkdir output/
+mv probes.bed output/probes.bed
+cat output/probes.bed
