@@ -46,13 +46,15 @@ sed -i.bu '1d' output/fragments.bed #add .bu on mac os
 awk '{if ($3-$2 > 120) print $0}' output/fragments.bed > output/temp.bed # can't use -i inplace on mac os
 mv output/temp.bed output/fragments.bed
 
-echo 'Constructing Probes .....'
 
 ############################################################################
+echo 'Constructing Probes .....'
 ## Create potential forward/reverse probes and get sequences
 parallel --bar ::: ./shell/create_forward.sh ./shell/create_reverse.sh
 
 ############################################################################
+
+echo 'Selecting Probes ....'
 ## Selecting appropriate probes over 3 passes for forward and reverse probes in parallel
 parallel --bar ::: ./shell/select_forward_1.sh ./shell/select_forward_2.sh ./shell/select_forward_3.sh ./shell/select_reverse_1.sh ./shell/select_reverse_2.sh ./shell/select_reverse_3.sh
 
@@ -91,11 +93,18 @@ awk -v OFS="\t" -v a="$chr" -v b="$start" -v c="$stop" '{print $1=a, $2=$2+b, $3
 mv output/temp.bed output/final_probes.bed
 
 ## Clean-up unpaired probes and select desired number
+echo 'Optimizing Probes ...'
 Rscript --vanilla scripts/reduce_probes.R $max_probes
 
 ## Remove intermediate files, cat final output
 mv output/probes.bed probes.bed
+mv output/final_probes.bed final_probes.bed # for testing R script
 rm -r output/
 mkdir output/
 mv probes.bed output/probes.bed
-cat output/probes.bed
+mv final_probes.bed output/final_probes.bed
+
+echo 'Output:'
+## Better formatted output than cat output/probes.bed
+awk -v OFS="\t" 'BEGIN {print "chr", "start", "stop", "shift", "res.fragment", "dir", "pct_at", "pct_gc", "seq", "pass"}{printf "%s \t %i \t %i \t %i \t %i \t %s \t %0.6f \t %0.6f \t %s \t %i\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10}' output/probes.bed
+

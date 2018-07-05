@@ -9,8 +9,11 @@
 
 ## Read in ../output/final_probes.bed
 suppressMessages(if (!require("readr")) {install.packages("readr", repos = "https://cloud.r-project.org"); library(readr)})
-din <- suppressMessages(as.data.frame(read_tsv("output/final_probes.bed", col_names = F)))
+din <- suppressMessages(as.data.frame(read_tsv("output/final_probes.bed", col_names = F, trim_ws = F)))
 colnames(din) <- c("chr", "start", "stop", "shift", "res.number", "dir", "pct_at", "pct_gc", "seq", "pass")
+
+write_tsv(din, "output/test.bed")
+din2 <- suppressMessages(as.data.frame(read_tsv("output/test.bed", col_names = T, trim_ws = F)))
 
 ## Clean up unpaired probes ###################################################################################
 
@@ -101,7 +104,7 @@ if (max_probes > n_probes){
 dout <- dout[,1:ncol(dout)-1]
 
 ## Write result to file
-write_tsv(dout, "output/probes.bed")
+write_tsv(dout, "output/probes.bed", col_names = F)
 
 ## Optional Diagnostsic Plots ################################################################################
 #pdf(file = sprintf("%d_probes.pdf", nrow(dout)))
