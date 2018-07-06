@@ -107,20 +107,6 @@ done
 : ${max_probes=$max_probes_DEFAULT}
 
 ## Error checking
-if [ $# -eq 0 ]
-	then
-		while true; do
-			default
-    		read -p "Run default settings? [Y/n]" yn
-    		case $yn in
-        		[Yy]* ) break;;
-        		[Nn]* ) exit;;
-        		* ) echo "Please answer yes or no.";;
-    		esac
-	done
-fi
-
-
 if [ $stop -lt $start ]
 	then
 		echo 'invalid option: -e must be greater than -b'
@@ -140,13 +126,30 @@ fi
 if [ -z "$max_probes" ]; 
 	then
 		mpf="Maximum"
-		awk -v chr="$chr" -v start="$start" -v stop="$stop" -v resenz="$resenz" -v mp="$mpf" 'BEGIN {printf "\n\nChromosome: %s\n\nStart: %i\n\nStop: %i\n\nRestriction Enzyme: %s\n\nNumber of probes: %s\n\n", chr, start, stop, resenz, mp}'
+
 	else
 		mpf="$max_probes"
-		awk -v chr="$chr" -v start="$start" -v stop="$stop" -v resenz="$resenz" -v mp="$mpf" 'BEGIN {printf "\n\nChromosome: %s\n\nStart: %i\n\nStop: %i\n\nRestriction Enzyme: %s\n\nNumber of probes: %i\n\n", chr, start, stop, resenz, mp}'
 fi
 
+## Function to display settings for probe design
+settings (){
+	echo "Chromosome: " $chr
+	echo "Start: " $start
+	echo "Stop: " $stop
+	echo "Restriction Enzyme: " $resenz
+	echo "Number of probes: " $mpf
+	echo ""
+}
 
-
+## Prompt before running
+while true; do
+			settings
+    		read -p "Run these settings? [Y/n]" yn
+    		case $yn in
+        		[Yy]* ) break;;
+        		[Nn]* ) exit;;
+        		* ) echo "Please answer yes or no.";;
+    		esac
+done
 
 shift $((OPTIND -1))
