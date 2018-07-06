@@ -14,6 +14,11 @@
 #  O. Tange (2018): GNU Parallel 2018, Mar 2018, ISBN 9781387509881,
 #  DOI https://doi.org/10.5281/zenodo.1146014
 
+## Setting path variables
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd $parent_path
+cd ..
+
 ## Source in usage and variable handling
 source ./shell/usage.sh
 
