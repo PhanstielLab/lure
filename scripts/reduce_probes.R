@@ -87,7 +87,7 @@ if (length(args)>1) {
   max_probes = as.numeric(args[1])
 }
 
-if (max_probes > n_probes){
+if (max_probes > n_probes | is.na(max_probes)){
   dout <- dout
 } else if (max_probes <= n_probes){
   section <- n_probes - max_probes
