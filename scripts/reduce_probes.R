@@ -87,9 +87,9 @@ if (length(args)>1) {
   max_probes = suppressWarnings(as.numeric(args[1]))
 }
 
-if (max_probes > n_probes | is.na(max_probes)){
+if (max_probes >= n_probes | is.na(max_probes)){
   dout <- dout
-} else if (max_probes <= n_probes){
+} else if (max_probes < n_probes){
   section <- n_probes - max_probes
   unwanted_probes <- prune[1:section]
   dout <- dout[!(row.names(dout) %in% unwanted_probes),]
