@@ -58,7 +58,7 @@ Output:
 #### Implementation
 LURE is written in BASH and R. It utilizes several command line tools (see Dependencies section) to identify and fragment the region of interest by restriction site (HiCUP), extract genomic fragments (Bedtools), and assess potential probes in parallel (GNU Parallel). The diagram below outlines LURE's workflow:
 
-![](flow_diagram.svg)
+![](README/flow_diagram.svg)
 
 #### Selection Criteria
 Criteria for selecting probes were modeled after Sanborn et. al. (2015) where they outline their Hi-C^2^ method. 
