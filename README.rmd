@@ -58,7 +58,7 @@ Output:
 #### Implementation
 LURE is written in BASH and R. It utilizes several command line tools (see Dependencies section) to identify and fragment the region of interest by restriction site (HiCUP), extract genomic fragments (Bedtools), and assess potential probes in parallel (GNU Parallel). The diagram below outlines LURE's workflow:
 
-```{r, echo = F}
+```{r, echo = F, eval=F}
 library(DiagrammeR)
 mermaid("
         graph TB
@@ -88,6 +88,7 @@ mermaid("
           O-->P(Output)
         ")
 ```
+![](flow_diagram.svg)
 
 #### Selection Criteria
 Criteria for selecting probes were modeled after Sanborn et. al. (2015) where they outline their Hi-C^2^ method. 
@@ -99,6 +100,6 @@ Pass Number | Distance from Restriction Site | Repetitive Bases | GC Content
 0 (Highest Quality) | ≤ 80 bp | < 10 | 50 - 60% 
 1  | ≤ 80 bp | < 10 | 40 - 70% 
 2  | ≤ 110 bp |  10 - 20 | 40 - 70% 
-3 (Highest Quality) | ≤ 110 bp | 20 - 25 | 25 - 80% 
+3 (Lowest Quality) | ≤ 110 bp | 20 - 25 | 25 - 80% 
 
 Selection critea relax as pass number increases, making the highest quality probes (passing the most restrictive criteria) pass 0 and lowest quality probes (passing the least strict criteria) pass 3.
