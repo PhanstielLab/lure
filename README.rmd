@@ -1,6 +1,6 @@
 # LURE (Command-Line)
 ***********************
-"A Probe Design Tool for Fishing Hi-C Data"
+![](README/lure_logo_current_annot.svg)
 
 ### Overview
 ***********************
