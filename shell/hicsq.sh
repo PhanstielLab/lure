@@ -40,7 +40,7 @@ trap int_function INT
 
 awk -v OFS="\t" -v a="$chr" -v b="$start" -v c="$stop" 'BEGIN {print a, b, c}' > output/roi.bed
 
-bedtools getfasta -fi $genome -bed output/roi.bed -fo output/roi.fasta
+bedtools getfasta -fi "$genome" -bed output/roi.bed -fo output/roi.fasta
 
 hicup_digester --re1 $resenz output/roi.fasta --outdir output/ --quiet
 
