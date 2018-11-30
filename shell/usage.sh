@@ -144,7 +144,7 @@ settings (){
 ## Prompt before running
 while true; do
 			settings
-    		read -p "Run these settings? [Y/n]" yn
+    		read -p "Run these settings? [Y/n] " yn
     		case $yn in
         		[Yy]* ) break;;
         		[Nn]* ) exit;;
