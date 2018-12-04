@@ -114,7 +114,9 @@ if [ $stop -lt $start ]
 		exit 1
 fi
 
-if [ -e "$genome" ]
+var=${var//\'\"/}
+genome="${genome/#\~/$HOME}"
+if [[ -f $genome ]]
 	then
 		:
 	else
