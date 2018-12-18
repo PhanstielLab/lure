@@ -61,6 +61,10 @@ sed -i.bu '1d' output/fragments.bed #add .bu on mac os
 
 awk '{if ($3-$2 > 120) print $0}' output/fragments.bed > output/temp.bed # can't use -i inplace on mac os
 mv output/temp.bed output/fragments.bed
+if [ ! -s output/fragments.bed ] ; then
+	echo 'Error: No digest sites found.'
+	exit 1
+fi
 
 
 ############################################################################
