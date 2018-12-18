@@ -41,7 +41,7 @@ trap int_function INT
 awk -v OFS="\t" -v a="$chr" -v b="$start" -v c="$stop" 'BEGIN {print a, b, c}' > output/roi.bed
 
 bedtools getfasta -fi "$genome" -bed output/roi.bed -fo output/roi.fasta 2> output/bedtools.err
-if grep -q Skipping output/bedtools.err; then
+if grep -e "Skipping\|Error" output/bedtools.err; then
 	cat output/bedtools.err
 	exit 1
 fi
