@@ -12,7 +12,7 @@ The user supplies a genome (.fasta format), genomic coordinates, a restriction e
 * [Genome.fasta](https://genome.ucsc.edu/cgi-bin/hgGateway)
 * [Bedtools](http://bedtools.readthedocs.io/en/latest/)
 * [R (version 3.3.2)](https://www.r-project.org/)
-* [HiCUP (Hi-C User Pipeline)](https://www.bioinformatics.babraham.ac.uk/projects/hicup/) and it's dependencies.
+* [HiCUP (Hi-C User Pipeline)](https://www.bioinformatics.babraham.ac.uk/projects/hicup/) and its dependencies.
 * [GNU Parallel](https://www.gnu.org/software/parallel/)
 * UNIX-based operating system
 
@@ -44,7 +44,7 @@ Run these settings? [Y/n]
 5. Messages will be written to <code>stdout</code> showing progress and displaying output:
 ```{text eval=F}
 HiCUP Digester (version 0.6.1)
-index file output/roi.fasta.fai not found, generating...
+index file /tmp/hicsq/roi.fasta.fai not found, generating...
 Constructing Probes .....
 100% 2:0=0s ./hic2probes/shell/create_reverse.sh                                                                           
 Selecting Probes ....
@@ -72,4 +72,4 @@ Pass Number | Distance from Restriction Site | Repetitive Bases | GC Content
 2  | ≤ 110 bp |  10 - 20 | 40 - 70% 
 3 (Lowest Quality) | ≤ 110 bp | 20 - 25 | 25 - 80% 
 
-Selection critea relax as pass number increases, making the highest quality probes (passing the most restrictive criteria) pass 0 and lowest quality probes (passing the least strict criteria) pass 3.
+Selection criteria relax as pass number increases, making the highest quality probes (passing the most restrictive criteria) pass 0 and lowest quality probes (passing the least strict criteria) pass 3.

@@ -135,6 +135,7 @@ fi
 
 ## Function to display settings for probe design
 settings (){
+	echo "Genome: " $genome
 	echo "Chromosome: " $chr
 	echo "Start: " $start
 	echo "Stop: " $stop
