@@ -7,9 +7,9 @@
 
 ## Read in data (din, data in) and max probes ################################################################
 
-## Read in /tmp/hicsq/all_probes.bed
+## Read in /tmp/lure/all_probes.bed
 suppressMessages(if (!require("readr")) {install.packages("readr", repos = "https://cloud.r-project.org"); library(readr)})
-din <- suppressMessages(as.data.frame(read_tsv("/tmp/hicsq/all_probes.bed", col_names = F, trim_ws = F)))
+din <- suppressMessages(as.data.frame(read_tsv("/tmp/lure/all_probes.bed", col_names = F, trim_ws = F)))
 colnames(din) <- c("chr", "start", "stop", "shift", "res.number", "dir", "pct_at", "pct_gc", "seq", "pass")
 
 ## Clean up unpaired probes ###################################################################################
@@ -101,7 +101,7 @@ if (max_probes >= n_probes | is.na(max_probes)){
 dout <- dout[,1:ncol(dout)-1]
 
 ## Write result to file
-write_tsv(dout, "/tmp/hicsq/filtered_probes.bed", col_names = F)
+write_tsv(dout, "/tmp/lure/filtered_probes.bed", col_names = F)
 
 ## Optional Diagnostsic Plots ################################################################################
 #pdf(file = sprintf("%d_probes.pdf", nrow(dout)))

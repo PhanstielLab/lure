@@ -20,14 +20,14 @@ The user supplies a genome (.fasta format), genomic coordinates, a restriction e
 **********************
 1. Clone git repository:
 ```{bash eval=F}
-git clone https://github.com/dphansti/hic2probes.git
+git clone https://github.com/PhanstielLab/lure.git
 ```
 
 2. Ensure that you have downloaded the proper [dependencies](#dependencies) and added them to your PATH.
 
-3. Run the hic2probes/shell/hicsq.sh script substituting in your desired values as shown:
+3. Run the lure/shell/lure.sh script substituting in your desired values as shown:
 ```{bash eval=F}
-./hic2probes/shell/hicsq.sh -c chr8 -b 133000000 -e 135000000 -r '^GATC,MobI' -g /path/to/genome.fasta -n 1000
+./lure/shell/lure.sh -c chr8 -b 133000000 -e 135000000 -r '^GATC,MobI' -g /path/to/genome.fasta -n 1000
 ```
 
 4. LURE will echo your settings and ask to continue:
@@ -44,11 +44,11 @@ Run these settings? [Y/n]
 5. Messages will be written to <code>stdout</code> showing progress and displaying output:
 ```{text eval=F}
 HiCUP Digester (version 0.6.1)
-index file /tmp/hicsq/roi.fasta.fai not found, generating...
+index file /tmp/lure/roi.fasta.fai not found, generating...
 Constructing Probes .....
-100% 2:0=0s ./hic2probes/shell/create_reverse.sh                                                                           
+100% 2:0=0s ./lure/shell/create_reverse.sh                                                                           
 Selecting Probes ....
-100% 6:0=0s ./hic2probes/shell/select_reverse_3.sh                                                                         
+100% 6:0=0s ./lure/shell/select_reverse_3.sh                                                                         
 Optimizing Probes ...
 Output:
 ```
