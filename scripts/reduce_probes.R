@@ -5,11 +5,21 @@
 ##    randomly chosen restriction sites
 
 
+## Return error if argument is greater than 2
+args <- commandArgs(trailingOnly = T)
+if (length(args) == 0){
+  output_folder = "/tmp/lure"
+} else if (length(args) == 1 || length(args) == 2){
+  output_folder = args[1]
+} else {
+  stop("Supply only the output folder and optionally, the number of desired probes.", call.=FALSE)
+}
+
 ## Read in data (din, data in) and max probes ################################################################
 
 ## Read in /tmp/lure/all_probes.bed
 suppressMessages(if (!require("readr")) {install.packages("readr", repos = "https://cloud.r-project.org"); library(readr)})
-din <- suppressMessages(as.data.frame(read_tsv("/tmp/lure/all_probes.bed", col_names = F, trim_ws = F)))
+din <- suppressMessages(as.data.frame(read_tsv(paste0(output_folder, "/all_probes.bed"), col_names = F, trim_ws = F)))
 colnames(din) <- c("chr", "start", "stop", "shift", "res.number", "dir", "pct_at", "pct_gc", "seq", "pass")
 
 ## Clean up unpaired probes ###################################################################################
@@ -76,15 +86,10 @@ prune <- c(prune1, as.numeric(row.names(remaining)))
 
 ## Check number of probes agains max_probes
 n_probes <- nrow(dout)
-
-## Return error if argument is greater than 1
-args <- commandArgs(trailingOnly = T)
-if (length(args)>1) {
-  stop("Supply the number of desired probes", call.=FALSE)
-} else if (length(args)<1){
+if (length(args) == 2){
+  max_probes = suppressWarnings(as.numeric(args[2]))
+} else {
   max_probes = n_probes
-} else if (length(args) == 1){
-  max_probes = suppressWarnings(as.numeric(args[1]))
 }
 
 if (max_probes >= n_probes | is.na(max_probes)){
@@ -101,7 +106,7 @@ if (max_probes >= n_probes | is.na(max_probes)){
 dout <- dout[,1:ncol(dout)-1]
 
 ## Write result to file
-write_tsv(dout, "/tmp/lure/filtered_probes.bed", col_names = F)
+write_tsv(dout, paste0(output_folder, "/filtered_probes.bed"), col_names = F)
 
 ## Optional Diagnostsic Plots ################################################################################
 #pdf(file = sprintf("%d_probes.pdf", nrow(dout)))

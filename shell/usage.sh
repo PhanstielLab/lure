@@ -24,6 +24,8 @@ usage () {
 	-g (genome): Path to the genome of interest (fasta format).
 
 	-n (number of probes desired): Defaults to maximum possible probes if not supplied.
+	
+	-o (output folder): Path where output files should go.
 
 
      Default:
@@ -39,6 +41,8 @@ usage () {
 	-g: "genomes/hg19/hg19.fasta"
 
 	-n: (max number of probes)
+	
+	-o: "/tmp/lure"
 
 ' #| less
 
@@ -60,6 +64,8 @@ default () {
 	-g: "genomes/hg19/hg19.fasta"
 
 	-n: (max number of probes)
+	
+	-o: "/tmp/lure"
 
 
 	'
@@ -73,10 +79,11 @@ stop_DEFAULT="135000000"
 resenz_DEFAULT="^GATC,MobI"
 genome_DEFAULT="genomes/hg19/hg19.fasta"
 max_probes_DEFAULT=""
+output_folder_DEFAULT="/tmp/lure"
 
 
 ## Parse command-line arguments with getopts
-while getopts c:b:e:r:g:n: ARGS;
+while getopts c:b:e:r:g:n:o: ARGS;
 do
 	case "${ARGS}" in
 		c)
@@ -91,6 +98,8 @@ do
 		   genome=${OPTARG};;
 		n)
 		   max_probes=${OPTARG};;
+		o)
+		   output_folder=${OPTARG};;
 		*)
 		   usage
 		   exit 1
@@ -105,6 +114,7 @@ done
 : ${resenz=$resenz_DEFAULT}
 : ${genome=$genome_DEFAULT}
 : ${max_probes=$max_probes_DEFAULT}
+: ${output_folder=$output_folder_DEFAULT}
 
 ## Error checking
 if [ $stop -lt $start ]
@@ -114,7 +124,6 @@ if [ $stop -lt $start ]
 		exit 1
 fi
 
-var=${var//\'\"/}
 genome="${genome/#\~/$HOME}"
 if [[ -f $genome ]]
 	then
@@ -133,6 +142,11 @@ if [ -z "$max_probes" ];
 		mpf="$max_probes"
 fi
 
+output_folder="${output_folder/#\~/$HOME}"
+if [[ ! -d $output_folder ]]; then
+  mkdir $output_folder
+fi
+
 ## Function to display settings for probe design
 settings (){
 	echo "Genome: " $genome
@@ -141,6 +155,7 @@ settings (){
 	echo "Stop: " $stop
 	echo "Restriction Enzyme: " $resenz
 	echo "Number of probes: " $mpf
+	echo "Output folder: " $output_folder
 	echo ""
 }
 
