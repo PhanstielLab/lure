@@ -6,12 +6,14 @@ usage () {
 
      Description:
 
-	 Hi-Csq is a probe design tool for Hi-C squared experiments. Use the options detailed below
+	 Lure is a probe design tool for Hi-C squared experiments. Use the options detailed below
 	 to select a region of interest, choose a restriction enzyme,  and specify the maximum
 	 number of probes to create.
 
 
      Usage:
+
+	-g (genome): Path to the genome of interest (fasta format).
 
 	-c (chromosome): Enter the chromosome of interest in the form "chr*" where * is an integer.
 
@@ -21,14 +23,14 @@ usage () {
 
 	-r (restriction enzyme): Restriction enzyme to digest region of interest. (i.e. "^GATC,MobI")
 
-	-g (genome): Path to the genome of interest (fasta format).
-
 	-n (number of probes desired): Defaults to maximum possible probes if not supplied.
 	
 	-o (output folder): Path where output files should go.
 
 
      Default:
+
+	-g: "genomes/hg19/hg19.fasta"
 
 	-c: "chr8"
 
@@ -37,8 +39,6 @@ usage () {
 	-e: "135000000"
 
 	-r: "^GATC,MboI"
-
-	-g: "genomes/hg19/hg19.fasta"
 
 	-n: (max number of probes)
 	
@@ -53,6 +53,8 @@ default () {
 
 	Default:
 
+	-g: "genomes/hg19/hg19.fasta"
+
 	-c: "chr8"
 
 	-b: "133000000"
@@ -61,31 +63,30 @@ default () {
 
 	-r: "^GATC,MboI"
 
-	-g: "genomes/hg19/hg19.fasta"
-
 	-n: (max number of probes)
 	
 	-o: "/tmp/lure"
-
 
 	'
 }
 
 
 ## Define default values
+genome_DEFAULT="genomes/hg19/hg19.fasta"
 chr_DEFAULT="chr8"
 start_DEFAULT="133000000"
 stop_DEFAULT="135000000"
 resenz_DEFAULT="^GATC,MobI"
-genome_DEFAULT="genomes/hg19/hg19.fasta"
 max_probes_DEFAULT=""
 output_folder_DEFAULT="/tmp/lure"
 
 
 ## Parse command-line arguments with getopts
-while getopts c:b:e:r:g:n:o: ARGS;
+while getopts g:c:b:e:r:n:o: ARGS;
 do
 	case "${ARGS}" in
+		g)
+		   genome=${OPTARG};;
 		c)
 		   chr=${OPTARG};;
 		b)
@@ -94,8 +95,6 @@ do
 		   stop=${OPTARG};;
 		r)
 		   resenz=${OPTARG};;
-		g)
-		   genome=${OPTARG};;
 		n)
 		   max_probes=${OPTARG};;
 		o)
@@ -108,22 +107,15 @@ do
 done
 
 # VARIABLE when it is returned
+: ${genome=$genome_DEFAULT}
 : ${chr=$chr_DEFAULT}
 : ${start=$start_DEFAULT}
 : ${stop=$stop_DEFAULT}
 : ${resenz=$resenz_DEFAULT}
-: ${genome=$genome_DEFAULT}
 : ${max_probes=$max_probes_DEFAULT}
 : ${output_folder=$output_folder_DEFAULT}
 
 ## Error checking
-if [ $stop -lt $start ]
-	then
-		echo 'invalid option: -e must be greater than -b'
-		usage
-		exit 1
-fi
-
 genome="${genome/#\~/$HOME}"
 if [[ -f $genome ]]
 	then
@@ -131,6 +123,13 @@ if [[ -f $genome ]]
 	else
 		echo 'invalid option: -g, Enter an existing fasta file'
 		exit
+fi
+
+if [ $stop -lt $start ]
+	then
+		echo 'invalid option: -e must be greater than -b'
+		usage
+		exit 1
 fi
 
 ## Display options used
@@ -143,9 +142,6 @@ if [ -z "$max_probes" ];
 fi
 
 output_folder="${output_folder/#\~/$HOME}"
-if [[ ! -d $output_folder ]]; then
-  mkdir $output_folder
-fi
 
 ## Function to display settings for probe design
 settings (){
