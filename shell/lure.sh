@@ -14,11 +14,9 @@
 
 ## Setting path variables
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
-cd "$parent_path"
-cd ..
 
 ## Source in usage and variable handling
-source ./shell/usage.sh
+source $parent_path/../shell/usage.sh
 
 ## Remove output folder if it already exists and create fresh
 if [ -d $output_folder ]; then
@@ -69,13 +67,13 @@ export output_folder=$output_folder
 ############################################################################
 echo 'Constructing Probes .....'
 ## Create potential forward/reverse probes and get sequences
-parallel --bar ::: ./shell/create_forward.sh ./shell/create_reverse.sh
+parallel --bar ::: $parent_path/../shell/create_forward.sh $parent_path/../shell/create_reverse.sh
 
 ############################################################################
 
 echo 'Selecting Probes ....'
 ## Selecting appropriate probes over 3 passes for forward and reverse probes in parallel
-parallel --bar ::: ./shell/select_forward_1.sh ./shell/select_forward_2.sh ./shell/select_forward_3.sh ./shell/select_reverse_1.sh ./shell/select_reverse_2.sh ./shell/select_reverse_3.sh
+parallel --bar ::: $parent_path/../shell/select_forward_1.sh $parent_path/../shell/select_forward_2.sh $parent_path/../shell/select_forward_3.sh $parent_path/../shell/select_reverse_1.sh $parent_path/../shell/select_reverse_2.sh $parent_path/../shell/select_reverse_3.sh
 
 
 ############################################################################
@@ -113,7 +111,7 @@ mv $output_folder/temp.bed $output_folder/all_probes.bed
 
 ## Clean-up unpaired probes and select desired number
 echo 'Optimizing Probes ...'
-Rscript --vanilla scripts/reduce_probes.R $output_folder $max_probes
+Rscript --vanilla $parent_path/../scripts/reduce_probes.R $output_folder $max_probes
 
 ## Remove intermediate files, cat final output
 mv $output_folder/filtered_probes.bed filtered_probes.bed
