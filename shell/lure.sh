@@ -109,6 +109,10 @@ cat "$output_folder/all_forward.bed" "$output_folder/all_reverse.bed" | awk -F "
 ## Add back in genomic coordinates
 awk -v OFS="\t" -v a="$chr" -v b="$start" -v c="$stop" '{print $1=a, $2=$2+b, $3=$3+b, $4, $5, $6, $7, $8, $9, $10}' "$output_folder/all_probes.bed" > "$output_folder/temp.bed"
 mv "$output_folder/temp.bed" "$output_folder/all_probes.bed"
+if [ ! -s "$output_folder/all_probes.bed" ] ; then
+	echo 'Error: No probes found.'
+	exit 1
+fi
 
 ## Clean-up unpaired probes and select desired number
 echo 'Optimizing Probes ...'
