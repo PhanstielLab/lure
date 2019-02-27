@@ -16,7 +16,7 @@
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 
 ## Source in usage and variable handling
-source $parent_path/usage.sh
+source "$parent_path/usage.sh"
 
 ## Remove output folder if it already exists and create fresh
 if [[ -d "$output_folder" ]]; then
