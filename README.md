@@ -1,6 +1,6 @@
 # LURE (Command-Line)
 ***********************
-![](README/lure_logo_current_annot.svg)
+![](README/Lure_logo_new.png)
 
 ### Overview
 ***********************
