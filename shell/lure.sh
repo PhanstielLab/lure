@@ -68,13 +68,13 @@ export output_folder=$output_folder
 echo 'Constructing Probes .....'
 
 ## Create potential forward/reverse probes and get sequences
-parallel --bar ::: "$parent_path/create_forward.sh" "$parent_path/create_reverse.sh"
+parallel --bar ::: \""$parent_path/create_forward.sh"\" \""$parent_path/create_reverse.sh"\"
 
 ############################################################################
 
 echo 'Selecting Probes ....'
 ## Selecting appropriate probes over 3 passes for forward and reverse probes in parallel
-parallel --bar ::: "$parent_path/select_forward_1.sh" "$parent_path/select_forward_2.sh" "$parent_path/select_forward_3.sh" "$parent_path/select_reverse_1.sh" "$parent_path/select_reverse_2.sh" "$parent_path/select_reverse_3.sh"
+parallel --bar ::: \""$parent_path/select_forward_1.sh"\" \""$parent_path/select_forward_2.sh"\" \""$parent_path/select_forward_3.sh"\" \""$parent_path/select_reverse_1.sh"\" \""$parent_path/select_reverse_2.sh"\" \""$parent_path/select_reverse_3.sh"\"
 
 
 ############################################################################
@@ -116,7 +116,7 @@ fi
 
 ## Clean-up unpaired probes and select desired number
 echo 'Optimizing Probes ...'
-Rscript --vanilla $parent_path/../scripts/reduce_probes.R "$output_folder" $max_probes
+Rscript --vanilla "$parent_path/../scripts/reduce_probes.R" "$output_folder" $max_probes
 
 ## Remove intermediate files, cat final output
 find "$output_folder" -type f -not -name "filtered_probes.bed" -not -name "all_probes.bed" -not -name "fragments.bed" -print0 | xargs -0 -I {} rm {}
