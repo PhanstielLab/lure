@@ -27,16 +27,19 @@ git clone https://github.com/PhanstielLab/lure.git
 
 3. Run the lure/shell/lure.sh script substituting in your desired values as shown:
 ```{bash eval=F}
-./lure/shell/lure.sh -c chr8 -b 133000000 -e 135000000 -r '^GATC,MobI' -g /path/to/genome.fasta -n 1000
+./lure/shell/lure.sh -c chr8 -b 133000000 -e 135000000 -r '^GATC,MobI' -g /path/to/genome.fasta -n 1000 -l 120 -o temp/
 ```
 
 4. LURE will echo your settings and ask to continue:
 ```{text eval=F}
+Genome:  /path/to/genome.fasta
 Chromosome:  chr8
 Start:  133000000
 Stop:  135000000
 Restriction Enzyme:  ^GATC,MobI
 Number of probes:  1000
+Probe Length:  120
+Output folder:  temp/
 
 Run these settings? [Y/n]
 ```
