@@ -63,12 +63,14 @@ if [ ! -s "$output_folder/fragments.bed" ] ; then
 fi
 
 export output_folder=$output_folder
+export length=$length
 
 ############################################################################
 echo 'Constructing Probes .....'
 
 ## Create potential forward/reverse probes and get sequences
 parallel --bar ::: \""$parent_path/create_forward.sh"\" \""$parent_path/create_reverse.sh"\"
+
 
 ############################################################################
 

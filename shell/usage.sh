@@ -24,6 +24,8 @@ usage () {
 	-r (restriction enzyme): Restriction enzyme to digest region of interest. (i.e. "^GATC,MobI")
 
 	-n (number of probes desired): Defaults to maximum possible probes if not supplied.
+
+	-l (probe length): Length of probes before adding index sequences
 	
 	-o (output folder): Path where output files should go.
 
@@ -41,6 +43,8 @@ usage () {
 	-r: "^GATC,MboI"
 
 	-n: (max number of probes)
+
+	-l: "120"
 	
 	-o: "/tmp/lure"
 
@@ -64,6 +68,8 @@ default () {
 	-r: "^GATC,MboI"
 
 	-n: (max number of probes)
+
+	-l: "120"
 	
 	-o: "/tmp/lure"
 
@@ -78,11 +84,12 @@ start_DEFAULT="133000000"
 stop_DEFAULT="135000000"
 resenz_DEFAULT="^GATC,MobI"
 max_probes_DEFAULT=""
+length_DEFAULT="120"
 output_folder_DEFAULT="/tmp/lure"
 
 
 ## Parse command-line arguments with getopts
-while getopts g:c:b:e:r:n:o: ARGS;
+while getopts g:c:b:e:r:n:l:o: ARGS;
 do
 	case "${ARGS}" in
 		g)
@@ -97,6 +104,8 @@ do
 		   resenz=${OPTARG};;
 		n)
 		   max_probes=${OPTARG};;
+		l)
+		   length=${OPTARG};;
 		o)
 		   output_folder=${OPTARG};;
 		*)
@@ -113,6 +122,7 @@ done
 : ${stop=$stop_DEFAULT}
 : ${resenz=$resenz_DEFAULT}
 : ${max_probes=$max_probes_DEFAULT}
+: ${length=$length_DEFAULT}
 : ${output_folder=$output_folder_DEFAULT}
 
 ## Error checking
@@ -128,6 +138,20 @@ fi
 if [ $stop -lt $start ]
 	then
 		echo 'invalid option: -e must be greater than -b'
+		usage
+		exit 1
+fi
+
+if [ $length -lt 2 ]
+	then
+		echo 'probe length must be greater than 1'
+		usage
+		exit 1
+fi
+
+if [ $max_probes -lt 1 ]
+	then
+		echo 'choose at least 1 probe'
 		usage
 		exit 1
 fi
@@ -151,6 +175,7 @@ settings (){
 	echo "Stop: " $stop
 	echo "Restriction Enzyme: " $resenz
 	echo "Number of probes: " $mpf
+	echo "Probe Length: " $length
 	echo "Output folder: " $output_folder
 	echo ""
 }
