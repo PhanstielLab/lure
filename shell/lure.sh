@@ -34,6 +34,7 @@ trap int_function INT
 ############################################################################
 ## Digest ROI to get restricton Fragments
 
+## Construct ROI
 awk -v OFS="\t" -v a="$chr" -v b="$start" -v c="$stop" 'BEGIN {print a, b, c}' > "$output_folder/roi.bed"
 
 bedtools getfasta -fi "$genome" -bed "$output_folder/roi.bed" -fo "$output_folder/roi.fasta" 2> "$output_folder/bedtools.err"
@@ -42,6 +43,14 @@ if grep -e "Skipping\|Error" "$output_folder/bedtools.err" ; then
 	exit 1
 fi
 
+## Get Length of Restriction Enzyme Split (for generating )
+forward=$(echo $resenz | sed 's/^.*\^//g')
+flength=${#forward}
+
+reverse=$(echo $resenz | sed 's/\^.*$//g')
+rlength=${#reverse}
+
+## Digest with double sided restriction enzyme
 hicup_digester --re1 $resenz "$output_folder/roi.fasta" --outdir "$output_folder/" --quiet
 
 mv "$output_folder/Digest"* "$output_folder/digest.bed"
@@ -51,17 +60,23 @@ sed -i.bu '1,2d' "$output_folder/digest.bed" #add .bu on mac os
 awk -v OFS="\t" '{$2-=1}; {print $0}' "$output_folder/digest.bed" > "$output_folder/temp.bed" # can't use -i inplace on mac os
 mv "$output_folder/temp.bed" "$output_folder/digest.bed"
 
+## Get Restriction Site Fragments and keep those greater than the length of a probe
 bedtools nuc -fi "$output_folder/roi.fasta" -bed "$output_folder/digest.bed" -seq > "$output_folder/fragments.bed"
 
 sed -i.bu '1d' "$output_folder/fragments.bed" #add .bu on mac os
 
-awk '{if ($3-$2 > 120) print $0}' "$output_folder/fragments.bed" > "$output_folder/temp.bed" # can't use -i inplace on mac os
+awk -v a="$length" '{if ($3-$2 >= a) print $0}' "$output_folder/fragments.bed" > "$output_folder/temp.bed" # can't use -i inplace on mac os
 mv "$output_folder/temp.bed" "$output_folder/fragments.bed"
 if [ ! -s "$output_folder/fragments.bed" ] ; then
 	echo 'Error: No digest sites found.'
 	exit 1
 fi
 
+## Export Variables for downstream processing
+export forward=$forward
+export flength=$flength
+export reverse=$reverse
+export rlength=$rlength
 export output_folder=$output_folder
 export length=$length
 

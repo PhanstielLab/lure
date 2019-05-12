@@ -40,7 +40,7 @@ usage () {
 
 	-e: "135000000"
 
-	-r: "^GATC,MboI"
+	-r: "^GATC"
 
 	-n: (max number of probes)
 
@@ -65,7 +65,7 @@ default () {
 
 	-e: "135000000"
 
-	-r: "^GATC,MboI"
+	-r: "^GATC"
 
 	-n: (max number of probes)
 
@@ -82,7 +82,7 @@ genome_DEFAULT="genomes/hg19/hg19.fasta"
 chr_DEFAULT="chr8"
 start_DEFAULT="133000000"
 stop_DEFAULT="135000000"
-resenz_DEFAULT="^GATC,MobI"
+resenz_DEFAULT="^GATC"
 max_probes_DEFAULT=""
 length_DEFAULT="120"
 output_folder_DEFAULT="/tmp/lure"

@@ -68,7 +68,7 @@ Criteria for selecting probes were modeled after Sanborn et. al. (2015) where th
 
 Briefly, potential probes were identified upstream and downstream of each restriction site. All potential probes were scored for repetitive bases, GC content, and distance from restriction site. Each probe was assigned a "Pass Number" (0-3) for overall quality according to the scheme below:
 
-Pass Number | Distance from Restriction Site | Repetitive Bases | GC Content
+Pass Number | Distance from Restriction Site | Repetitive Regions | GC Content
 ------------|--------------------------------|------------------|------------
 0 (Highest Quality) | ≤ 80 bp | < 10 | 50 - 60% 
 1  | ≤ 80 bp | < 10 | 40 - 70% 
