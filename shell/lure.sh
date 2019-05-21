@@ -133,11 +133,12 @@ fi
 
 ## Clean-up unpaired probes and select desired number
 echo 'Optimizing Probes ...'
-Rscript --vanilla "$parent_path/../scripts/reduce_probes.R" "$output_folder" $max_probes
+Rscript --vanilla "$parent_path/../scripts/reduce_probes.R" "$output_folder" $max_probes $remove_overlapping
 
 ## Remove intermediate files, cat final output
 find "$output_folder" -type f -not -name "filtered_probes.bed" -not -name "all_probes.bed" -not -name "fragments.bed" -print0 | xargs -0 -I {} rm {}
 
 echo 'Output:'
 ## Better formatted output than cat $output_folder/probes.bed
-awk -v OFS="\t" 'BEGIN {print "chr", "start", "stop", "shift", "res.fragment", "dir", "pct_at", "pct_gc", "seq", "pass"}{printf "%s \t %i \t %i \t %i \t %i \t %s \t %0.6f \t %0.6f \t %s \t %i\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10}' "$output_folder/filtered_probes.bed"
+# awk -v OFS="\t" 'BEGIN {print "chr", "start", "stop", "shift", "res.fragment", "dir", "pct_at", "pct_gc", "seq", "pass"}{printf "%s \t %i \t %i \t %i \t %i \t %s \t %0.6f \t %0.6f \t %s \t %i\n", $1, $2, $3, $4, $5, $6, $7, $8, $9, $10}' "$output_folder/filtered_probes.bed"
+echo "Done! See results: less -S $output_folder/filtered_probes.bed"

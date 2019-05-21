@@ -13,21 +13,23 @@ usage () {
 
      Usage:
 
-	-g (genome): Path to the genome of interest (fasta format).
+	-g [path as string] (genome): Path to the genome of interest (fasta format).
 
-	-c (chromosome): Enter the chromosome of interest in the form "chr*" where * is an integer.
+	-c [string] (chromosome): Enter the chromosome of interest in the form "chr*" where * is an integer.
 
-	-b (begin): Start position of your region of interest for probe design. -b must be less than -e.
+	-b [integer] (begin): Start position of your region of interest for probe design. -b must be less than -e.
 
-	-e (end): Stop position on the chromosome. -e must be greater than -b.
+	-e [integer] (end): Stop position on the chromosome. -e must be greater than -b.
 
-	-r (restriction enzyme): Restriction enzyme to digest region of interest. (i.e. "^GATC,MobI")
+	-r [string] (restriction enzyme): Restriction enzyme to digest region of interest. (i.e. "^GATC,MobI")
 
-	-n (number of probes desired): Defaults to maximum possible probes if not supplied.
+	-n [integer] (number of probes desired): Defaults to maximum possible probes if not supplied.
 
-	-l (probe length): Length of probes before adding index sequences
+	-p [boolean] (remove overlapping probes): Removes the worse of two probes with any amount of overlap.
+
+	-l [integer] (probe length): Length of probes before adding index sequences.
 	
-	-o (output folder): Path where output files should go.
+	-o [path as string] (output folder): Path where output files should go.
 
 
      Default:
@@ -43,6 +45,8 @@ usage () {
 	-r: "^GATC"
 
 	-n: (max number of probes)
+
+	-p: false
 
 	-l: "120"
 	
@@ -69,6 +73,8 @@ default () {
 
 	-n: (max number of probes)
 
+	-p: false
+
 	-l: "120"
 	
 	-o: "/tmp/lure"
@@ -84,12 +90,13 @@ start_DEFAULT="133000000"
 stop_DEFAULT="135000000"
 resenz_DEFAULT="^GATC"
 max_probes_DEFAULT=""
+remove_overlapping_DEFAULT=false
 length_DEFAULT="120"
 output_folder_DEFAULT="/tmp/lure"
 
 
 ## Parse command-line arguments with getopts
-while getopts g:c:b:e:r:n:l:o: ARGS;
+while getopts g:c:b:e:r:n:p:l:o: ARGS;
 do
 	case "${ARGS}" in
 		g)
@@ -104,6 +111,8 @@ do
 		   resenz=${OPTARG};;
 		n)
 		   max_probes=${OPTARG};;
+	    p)
+		   remove_overlapping=${OPTARG};;
 		l)
 		   length=${OPTARG};;
 		o)
@@ -122,6 +131,7 @@ done
 : ${stop=$stop_DEFAULT}
 : ${resenz=$resenz_DEFAULT}
 : ${max_probes=$max_probes_DEFAULT}
+: ${remove_overlapping=$remove_overlapping_DEFAULT}
 : ${length=$length_DEFAULT}
 : ${output_folder=$output_folder_DEFAULT}
 
@@ -156,6 +166,13 @@ if [ $max_probes -lt 1 ]
 		exit 1
 fi
 
+if [ "$remove_overlapping" != "true" ] && [ "$remove_overlapping" != "false" ]
+	then
+		echo '-p should be "true" or "false"'
+		usage
+		exit 1
+fi
+
 ## Display options used
 if [ -z "$max_probes" ]; 
 	then
@@ -175,6 +192,7 @@ settings (){
 	echo "Stop: " $stop
 	echo "Restriction Enzyme: " $resenz
 	echo "Number of probes: " $mpf
+	echo "Remove Overlapping Probes?: " $remove_overlapping
 	echo "Probe Length: " $length
 	echo "Output folder: " $output_folder
 	echo ""

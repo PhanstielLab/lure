@@ -8,18 +8,35 @@
 args <- commandArgs(trailingOnly = T)
 if (length(args) == 0){
   output_folder = "/tmp/lure"
-} else if (length(args) == 1 || length(args) == 2){
+} else if (length(args) == 1 || length(args) == 2 || length(args) == 3){
   output_folder = args[1]
 } else {
   stop("Supply only the output folder and optionally, the number of desired probes.", call.=FALSE)
 }
+
 
 ## Read in data (din, data in) and max probes ################################################################
 
 ## Read in /tmp/lure/all_probes.bed
 suppressMessages(if (!require("readr")) {install.packages("readr", repos = "https://cloud.r-project.org"); library(readr)})
 din <- suppressMessages(as.data.frame(read_tsv(paste0(output_folder, "/all_probes.bed"), col_names = F, trim_ws = F)))
-colnames(din) <- c("chr", "start", "stop", "shift", "res.number", "dir", "pct_at", "pct_gc", "seq", "pass")
+## Correct dimension names when rerunning this script through the lure app
+if(dim(din)[2] == 10){
+  colnames(din) <- c("chr", "start", "stop", "shift", "res.number", "dir", "pct_at", "pct_gc", "seq", "pass")
+}else{
+  colnames(din) <- c("chr", "start", "stop", "shift", "res.number", "dir", "pct_at", "pct_gc", "seq", "pass", "repetitive", "gc_score", "quality_score", "quality")
+}
+
+## Compute repetitive regions and GC Score for all probes
+din$repetitive <- plyr::ldply(stringr::str_match_all(din$seq,"[acgt]"),length)$V1
+din$gc_score <- abs(din$pct_gc - 0.55)
+
+## Quality Score ####
+quality_scores <- ((1-din$repetitive/25) + (1 - din$shift/110) + (1 - din$gc_score/ 0.3))/3 # 4 (1 - din$pass/3) +
+quality_factor <- cut(quality_scores, breaks = 3)
+levels(quality_factor) <- c("Low", "Medium", "High")
+din$quality_score <- quality_scores
+din$quality <- quality_factor
 dout <- din
 
 ## Find Overlapping Probes and order them from worst to best quality #########################################
@@ -34,6 +51,8 @@ temp$shift1 <- din$shift[temp$index1]
 temp$shift2 <- din$shift[temp$index2]
 temp$pct_gc1 <- din$pct_gc[temp$index1]
 temp$pct_gc2 <- din$pct_gc[temp$index2]
+temp$qual1 <- din$quality_score[temp$index1]
+temp$qual2 <- din$quality_score[temp$index2]
 
 ## Keep only overlapping probes and order by reverse quality ####
 temp <- temp[temp$overlap > 0,]
@@ -41,6 +60,7 @@ temp <- temp[order(temp$overlap,
                    temp$repetitive1, temp$repetitive2,
                    temp$shift1, temp$shift2,
                    temp$pct_gc1, temp$pct_gc2, decreasing = T),]
+write_tsv(temp, paste0(output_folder, "/overlapping_probes.txt"), col_names = T) # for text annotations
 
 ## Choose the worst of the two overlapping probes to remove ####
 set.seed(123)
@@ -50,34 +70,46 @@ prune1 <- sapply(1:nrow(temp), function(i){
       if(temp$pct_gc1[i] == temp$pct_gc2[i]){
         return(sample(c(temp$index1[i], temp$index2[i]), 1))
       }else{
-        if(abs(temp$pct_gc1[i]-0.5) >= abs(temp$shift2[i]-0.5)) return(temp$index2[i]) else return(temp$index1[i])
+        if(abs(temp$pct_gc1[i]-0.55) >= abs(temp$shift2[i]-0.55)) return(temp$index1[i]) else return(temp$index2[i])
       }
     }else{
-      if(temp$shift1[i] > temp$shift2[i]) return(temp$index2[i]) else return(temp$index1[i])
+      if(temp$shift1[i] > temp$shift2[i]) return(temp$index1[i]) else return(temp$index2[i])
     }
   }else{
-    if(temp$repetitive1[i] > temp$repetitive2[i]) return(temp$index2[i]) else return(temp$index1[i])
+    if(temp$repetitive1[i] > temp$repetitive2[i]) return(temp$index1[i]) else return(temp$index2[i])
   }
 })
 
 ## Remove overlapping probes from list and generate removal order from worst to best probes ####
 temp2 <- din[-prune1,]
-temp2$repetitive <- plyr::ldply(stringr::str_match_all(temp2$seq,"[acgt]"),length)$V1
-temp2$gc_score <- abs(temp2$pct_gc - 0.5)
 set.seed(123)
-temp2 <- temp2[order(temp2$repetitive, temp2$shift, temp2$gc_score, runif(nrow(temp2)), decreasing = T),]
+temp2 <- temp2[order(temp2$repetitive, temp2$shift, temp2$gc_score, runif(nrow(temp2)), decreasing = T),] #temp2$pass, 
+prune2 <- as.numeric(rownames(temp2))
 
-## Join with prune1 to create an preferential removal list ####
-prune <- unique(c(prune1, as.numeric(rownames(temp2))))
+## Join prune1 and prune2 to create an preferential removal list ####
+prune <- unique(c(prune1, prune2))
 
-## Check number of probes agains max_probes
+## Parse Command-line Args to set max_probes and remove_overlapping
 n_probes <- nrow(dout)
-if (length(args) == 2){
+if(length(args) > 2){
   max_probes = suppressWarnings(as.numeric(args[2]))
-} else {
+  remove_overlapping = toupper(args[3])
+} else if (length(args) == 2){
   max_probes = n_probes
+  remove_overlapping = toupper(args[2])
+} else if (length(args) == 1){
+  max_probes = n_probes
+  remove_overlapping = FALSE
+}else{
+  stop("Command-line argument parsing error", call.=FALSE)
 }
 
+## Remove all overlapping probes if remove_overlapping == TRUE
+if (remove_overlapping == TRUE){
+  dout <- dout[!(row.names(dout) %in% prune1),]
+} 
+
+## If max_probes < n_probes, remove the difference (unless already removed by overlapping probes)
 if (max_probes >= n_probes | is.na(max_probes)){
   dout <- dout
 } else if (max_probes < n_probes){
@@ -85,7 +117,7 @@ if (max_probes >= n_probes | is.na(max_probes)){
   unwanted_probes <- prune[1:section]
   dout <- dout[!(row.names(dout) %in% unwanted_probes),]
 } else {
-  print("Something isn't right...")
+  stop("Probe filtering error", call.=FALSE)
 }
 
 ## Write result to file
