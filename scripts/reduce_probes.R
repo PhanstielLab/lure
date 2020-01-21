@@ -63,31 +63,48 @@ temp <- temp[order(temp$overlap,
 write_tsv(temp, paste0(output_folder, "/overlapping_probes.txt"), col_names = T) # for text annotations
 
 ## Choose the worst of the two overlapping probes to remove ####
-set.seed(123)
-prune1 <- sapply(1:nrow(temp), function(i){
-  if(temp$repetitive1[i] == temp$repetitive2[i]){
-    if(temp$shift1[i] == temp$shift2[i]){
-      if(temp$pct_gc1[i] == temp$pct_gc2[i]){
-        return(sample(c(temp$index1[i], temp$index2[i]), 1))
+# if(nrow(temp) <= 0){
+#   ## Write result to file
+#   write_tsv(dout, paste0(output_folder, "/filtered_probes.bed"), col_names = F)
+# } else {
+#   
+# }
+
+## Choose the worst of the two overlapping probes to remove ####
+if (nrow(temp) > 0){
+  set.seed(123)
+  prune1 <- sapply(1:nrow(temp), function(i){
+    if(temp$repetitive1[i] == temp$repetitive2[i]){
+      if(temp$shift1[i] == temp$shift2[i]){
+        if(temp$pct_gc1[i] == temp$pct_gc2[i]){
+          return(sample(c(temp$index1[i], temp$index2[i]), 1))
+        }else{
+          if(abs(temp$pct_gc1[i]-0.55) >= abs(temp$shift2[i]-0.55)) return(temp$index1[i]) else return(temp$index2[i])
+        }
       }else{
-        if(abs(temp$pct_gc1[i]-0.55) >= abs(temp$shift2[i]-0.55)) return(temp$index1[i]) else return(temp$index2[i])
+        if(temp$shift1[i] > temp$shift2[i]) return(temp$index1[i]) else return(temp$index2[i])
       }
     }else{
-      if(temp$shift1[i] > temp$shift2[i]) return(temp$index1[i]) else return(temp$index2[i])
+      if(temp$repetitive1[i] > temp$repetitive2[i]) return(temp$index1[i]) else return(temp$index2[i])
     }
-  }else{
-    if(temp$repetitive1[i] > temp$repetitive2[i]) return(temp$index1[i]) else return(temp$index2[i])
-  }
-})
+  })
+  
+  ## Remove overlapping probes from list
+  temp2 <- din[-prune1,]
+}
 
-## Remove overlapping probes from list and generate removal order from worst to best probes ####
-temp2 <- din[-prune1,]
+## Generate removal order from worst to best probes ####
+temp2 <- din
 set.seed(123)
 temp2 <- temp2[order(temp2$repetitive, temp2$shift, temp2$gc_score, runif(nrow(temp2)), decreasing = T),] #temp2$pass, 
 prune2 <- as.numeric(rownames(temp2))
 
-## Join prune1 and prune2 to create an preferential removal list ####
-prune <- unique(c(prune1, prune2))
+if (nrow(temp) > 0){
+  ## Join prune1 and prune2 to create an preferential removal list ####
+  prune <- unique(c(prune1, prune2))
+} else {
+  prune <- prune2
+}
 
 ## Parse Command-line Args to set max_probes and remove_overlapping
 n_probes <- nrow(dout)
@@ -105,9 +122,13 @@ if(length(args) > 2){
 }
 
 ## Remove all overlapping probes if remove_overlapping == TRUE
-if (remove_overlapping == TRUE){
-  dout <- dout[!(row.names(dout) %in% prune1),]
-} 
+if (nrow(temp) > 0) {
+  if (remove_overlapping == TRUE){
+    dout <- dout[!(row.names(dout) %in% prune1),]
+  } 
+} else {
+  dout <- dout
+}
 
 ## If max_probes < n_probes, remove the difference (unless already removed by overlapping probes)
 if (max_probes >= n_probes | is.na(max_probes)){
